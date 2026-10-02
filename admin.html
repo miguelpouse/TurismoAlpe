@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin · Turismo Alpe</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<style>
+:root{--primary:#0a6e5c;--primary-dark:#064e40;--primary-light:#0f8f76;--accent:#ff6b35;--gold:#f7b801;--bg:#fafaf7;--surface:#fff;--surface-2:#f4f6f5;--text:#0f1a1a;--text-muted:#5a6b6b;--border:#e5ebe9;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--shadow-sm:0 1px 3px rgba(6,78,64,.06);--shadow-md:0 4px 14px rgba(6,78,64,.08);--shadow-lg:0 20px 40px -12px rgba(6,78,64,.18);--shadow-xl:0 30px 60px -15px rgba(6,78,64,.25);--radius:16px;--radius-lg:24px;--transition:all .3s cubic-bezier(.4,0,.2,1);--header-h:80px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5,h6{font-family:'Plus Jakarta Sans','Inter',sans-serif;letter-spacing:-.02em;font-weight:800}
+.mono{font-family:'JetBrains Mono',monospace;font-weight:700}
+img{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit}
+.icon{display:inline-block;vertical-align:middle;flex-shrink:0}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.admin-login{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,var(--primary-dark),var(--primary) 50%,var(--primary-light))}
+.login-card{background:var(--surface);border-radius:var(--radius-lg);padding:44px 40px;max-width:420px;width:100%;box-shadow:var(--shadow-xl);animation:slideUp .5s ease}
+.login-logo{text-align:center;margin-bottom:24px}
+.login-logo .mark{height:3.5rem;margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+.login-logo .mark img{height:100%;width:auto;max-width:160px;object-fit:contain}
+.login-logo h2{font-size:1.5rem;margin-bottom:6px}
+.login-logo p{color:var(--text-muted);font-size:.9rem}
+
+.admin-shell{min-height:100vh;display:flex;flex-direction:column}
+.admin-topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:var(--header-h);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.admin-topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--primary);height:100%}
+.admin-topbar .brand .logo-text{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.4rem;font-weight:800;color:var(--primary);letter-spacing:-.03em}
+.admin-topbar .brand .logo-mark{height:2rem;display:flex;align-items:center}
+.admin-topbar .brand .logo-mark img{height:100%;width:auto;max-width:110px;object-fit:contain}
+.admin-topbar .brand .badge{padding:3px 10px;border-radius:100px;background:var(--gold);color:#5a3d00;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.admin-user{display:flex;align-items:center;gap:12px;color:var(--text-muted);font-size:.9rem}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:grid;place-items:center;color:#fff;font-weight:700;font-size:.85rem}
+.admin-tabs{background:var(--surface);padding:0 28px;border-bottom:1px solid var(--border);display:flex;gap:4px;overflow-x:auto}
+.admin-tab{padding:16px 22px;font-weight:600;color:var(--text-muted);font-size:.9rem;border-bottom:3px solid transparent;transition:var(--transition);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.admin-tab:hover{color:var(--primary)}
+.admin-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.admin-content{padding:32px 28px;max-width:1400px;margin:0 auto;width:100%;flex:1}
+.admin-view{display:none}
+.admin-view.active{display:block;animation:fadeIn .4s ease}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:32px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-sm);border:1px solid var(--border);transition:var(--transition)}
+.stat-card:hover{box-shadow:var(--shadow-md);transform:translateY(-3px)}
+.stat-card .lbl{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);font-weight:700;margin-bottom:10px}
+.stat-card .val{font-size:2.1rem;font-weight:800;color:var(--primary);line-height:1}
+.stat-card .sub{font-size:.82rem;color:var(--text-muted);margin-top:8px}
+.stat-card.accent .val{color:var(--accent)}
+.stat-card.gold .val{color:var(--gold)}
+
+.expiry-alert{background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #f59e0b;border-radius:var(--radius);padding:18px 22px;margin-bottom:24px;display:flex;align-items:flex-start;gap:16px;animation:slideUp .4s ease-out}
+.expiry-alert .alert-icon{width:44px;height:44px;border-radius:12px;flex-shrink:0;background:#f59e0b;color:#fff;display:grid;place-items:center}
+.expiry-alert .alert-body{flex:1;min-width:0}
+.expiry-alert .alert-title{font-weight:800;font-size:1rem;color:#78350f;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.expiry-alert .alert-desc{font-size:.88rem;color:#92400e;line-height:1.5;margin-bottom:12px}
+.expiry-alert .alert-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.expiry-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;background:rgba(255,255,255,.55);border-radius:10px;font-size:.85rem}
+.expiry-item .info{min-width:0;flex:1}
+.expiry-item .title{font-weight:700;color:#78350f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.expiry-item .date{font-size:.78rem;color:#92400e}
+.expiry-item .btn-mini{padding:6px 12px;border-radius:8px;background:#f59e0b;color:#fff;font-size:.75rem;font-weight:700;transition:var(--transition);white-space:nowrap}
+.expiry-item .btn-mini:hover{background:#d97706}
+.expiry-item .btn-mini.ghost{background:rgba(255,255,255,.7);color:#78350f;border:1px solid rgba(245,158,11,.4)}
+
+.scanner-layout{display:grid;grid-template-columns:1.3fr 1fr;gap:24px}
+.scanner-viewport{position:relative;background:#0a1a18;border-radius:var(--radius);overflow:hidden;min-height:400px;display:grid;place-items:center}
+.scanner-viewport #reader{width:100%}
+.scanner-viewport #reader video{border-radius:var(--radius) !important;width:100% !important}
+.scanner-viewport .placeholder{color:#8fa5a1;text-align:center;padding:40px 20px}
+.scanner-viewport .placeholder .icon-big{width:80px;height:80px;margin:0 auto 16px;background:rgba(255,255,255,.06);border-radius:24px;display:grid;place-items:center;color:#8fa5a1}
+.scanner-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.scan-result{padding:20px;border-radius:var(--radius);background:var(--surface);border:1.5px solid var(--border);min-height:200px}
+.scan-result.ok{border-color:var(--success);background:#f0fdf4}
+.scan-result.warn{border-color:var(--warning);background:#fffbeb}
+.scan-result.err{border-color:var(--danger);background:#fef2f2}
+.scan-result h4{font-size:1.05rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.scan-result .field{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,.08);font-size:.88rem;gap:12px}
+.scan-result .field:last-child{border:none}
+.scan-result .field .k{color:var(--text-muted);flex-shrink:0}
+.scan-result .field .v{font-weight:600;text-align:right;word-break:break-word}
+.scan-status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:100px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.scan-status-pill.ok{background:#d1fae5;color:#065f46}
+.scan-status-pill.warn{background:#fef3c7;color:#92400e}
+.scan-status-pill.err{background:#fee2e2;color:#991b1b}
+
+.panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden}
+.panel-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.panel-head h3{font-size:1.15rem;font-weight:800}
+.panel-body{padding:20px 24px}
+.panel-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th{text-align:left;padding:12px 14px;font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:2px solid var(--border);background:var(--bg)}
+td{padding:14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:rgba(10,110,92,.02)}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.status-badge.pending{background:#fef3c7;color:#92400e}
+.status-badge.confirmed{background:#d1fae5;color:#065f46}
+.status-badge.cancelled{background:#fee2e2;color:#991b1b}
+.status-badge.checked-in{background:#dbeafe;color:#1e40af}
+
+.trip-admin-row{display:flex;gap:16px;align-items:center;padding:16px;border:1px solid var(--border);border-radius:14px;margin-bottom:12px;background:var(--surface);transition:var(--transition)}
+.trip-admin-row:hover{box-shadow:var(--shadow-md);border-color:rgba(10,110,92,.2);transform:translateX(3px)}
+.trip-admin-row.expired{border-color:#f59e0b;background:#fffbeb}
+.trip-admin-row img{width:90px;height:68px;border-radius:10px;object-fit:cover;flex-shrink:0}
+.trip-admin-row .info{flex:1;min-width:0}
+.trip-admin-row .info h4{font-size:.98rem;font-weight:800;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trip-admin-row .info p{font-size:.82rem;color:var(--text-muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.trip-admin-row .actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.expired-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;background:#f59e0b;color:#fff;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+
+.btn-text{padding:8px 14px;border-radius:10px;font-weight:600;font-size:.82rem;display:inline-flex;align-items:center;gap:6px;transition:var(--transition);border:1px solid transparent;white-space:nowrap}
+.btn-text.primary{background:var(--primary);color:#fff}
+.btn-text.primary:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.btn-text.ghost{background:var(--surface-2);color:var(--text-muted);border-color:var(--border)}
+.btn-text.ghost:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-text.danger{background:#fee2e2;color:#991b1b}
+.btn-text.danger:hover{background:var(--danger);color:#fff}
+.btn-text.warn{background:#fef3c7;color:#92400e}
+.btn-text.warn:hover{background:var(--warning);color:#fff}
+.btn-text.success{background:#d1fae5;color:#065f46}
+.btn-text.success:hover{background:var(--success);color:#fff}
+
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:8px}
+.form-group label .req{color:var(--danger)}
+.form-control{width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-size:.95rem;color:var(--text);transition:var(--transition);outline:none}
+.form-control:focus{border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 4px rgba(10,110,92,.1)}
+textarea.form-control{resize:vertical;min-height:90px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-hint{font-size:.8rem;color:var(--text-muted);margin-top:6px}
+
+.btn{padding:12px 20px;border-radius:12px;font-weight:600;font-size:.9rem;transition:var(--transition);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:0 6px 16px rgba(10,110,92,.25)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(10,110,92,.35)}
+.btn-outline{background:transparent;color:var(--text-muted);border:1.5px solid var(--border)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-success{background:var(--success);color:#fff}
+.btn-block{width:100%}
+
+.modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(6,26,24,.6);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;animation:fadeIn .3s}
+.modal-overlay.active{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius-lg);max-width:760px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:slideUp .4s cubic-bezier(.34,1.56,.64,1)}
+.modal-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;position:sticky;top:0;background:var(--surface);z-index:2;border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.modal-header h2{font-size:1.4rem;font-weight:800;line-height:1.2}
+.modal-close{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;background:var(--bg);transition:var(--transition);color:var(--text-muted)}
+.modal-close:hover{background:var(--danger);color:#fff;transform:rotate(90deg)}
+.modal-body{padding:28px}
+.modal-footer{padding:20px 28px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;position:sticky;bottom:0;background:var(--surface);border-radius:0 0 var(--radius-lg) var(--radius-lg)}
+
+.toast-container{position:fixed;top:100px;right:20px;z-index:3000;display:flex;flex-direction:column;gap:10px}
+.toast{padding:16px 20px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:12px;min-width:280px;max-width:400px;border-left:4px solid var(--primary);animation:fadeIn .3s, slideUp .4s cubic-bezier(.34,1.56,.64,1)}
+.toast.success{border-color:var(--success)}
+.toast.error{border-color:var(--danger)}
+.toast.warning{border-color:var(--warning)}
+.toast .msg{flex:1;font-size:.9rem;font-weight:500}
+
+.chart-container{position:relative;height:260px;margin-top:10px}
+.switch{position:relative;display:inline-block;width:46px;height:26px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:26px;transition:.3s}
+.slider:before{content:'';position:absolute;height:20px;width:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+input:checked + .slider{background:var(--primary)}
+input:checked + .slider:before{transform:translateX(20px)}
+
+.room-options{border:1.5px solid var(--border);border-radius:12px;padding:16px;background:var(--bg);margin-top:8px}
+.room-options-title{font-size:.85rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.room-option-row{display:grid;grid-template-columns:2fr 1fr;gap:10px;align-items:center;margin-bottom:10px}
+.room-option-row input{padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:.88rem;outline:none}
+.room-option-row input:focus{border-color:var(--primary)}
+.room-option-row label{font-size:.82rem;color:var(--text-muted)}
+
+.image-upload{display:flex;gap:16px;align-items:center;padding:16px;background:var(--bg);border-radius:14px;border:2px dashed var(--border);flex-wrap:wrap;transition:var(--transition)}
+.image-upload:hover{border-color:var(--primary-light)}
+.image-preview{width:140px;height:100px;border-radius:12px;background:var(--surface);display:grid;place-items:center;overflow:hidden;border:1px solid var(--border);flex-shrink:0;color:var(--text-muted)}
+.image-preview img{width:100%;height:100%;object-fit:cover}
+.image-upload .upload-info{flex:1;min-width:200px}
+.image-upload .upload-info h5{font-weight:700;font-size:.95rem;margin-bottom:4px}
+.image-upload .upload-info p{font-size:.82rem;color:var(--text-muted)}
+.image-upload .upload-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+.cmdk-overlay{position:fixed;inset:0;z-index:4000;background:rgba(6,26,24,.5);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:80px 20px 20px;animation:fadeIn .2s}
+.cmdk-overlay.active{display:flex}
+.cmdk{background:var(--surface);border-radius:18px;max-width:600px;width:100%;box-shadow:var(--shadow-xl);overflow:hidden;animation:slideUp .3s ease}
+.cmdk-input{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.cmdk-input input{flex:1;border:none;background:none;outline:none;font-size:1.05rem;font-weight:500;color:var(--text)}
+.cmdk-input .kbd{font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:3px 8px;border-radius:6px;background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border)}
+.cmdk-results{max-height:400px;overflow-y:auto}
+.cmdk-item{padding:14px 24px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:var(--transition);border-bottom:1px solid var(--border)}
+.cmdk-item:hover,.cmdk-item.selected{background:rgba(10,110,92,.06)}
+.cmdk-item .ico{width:36px;height:36px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;color:var(--primary);flex-shrink:0}
+.cmdk-item .txt{flex:1;min-width:0}
+.cmdk-item .t{font-weight:600;font-size:.92rem;margin-bottom:2px}
+.cmdk-item .s{font-size:.78rem;color:var(--text-muted)}
+.cmdk-empty{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:.9rem}
+
+.occupancy-mini{height:5px;background:var(--surface-2);border-radius:100px;overflow:hidden;margin-top:4px;width:100%;max-width:120px}
+.occupancy-mini .fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:100px;transition:width .8s ease}
+
+.date-filter-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 0;font-size:.82rem;color:var(--text-muted)}
+.date-filter-row input[type="date"]{padding:8px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:.85rem;outline:none;color:var(--text)}
+.date-filter-row input[type="date"]:focus{border-color:var(--primary)}
+
+.calendar-view{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.calendar-month{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow-sm);transition:var(--transition)}
+.calendar-month:hover{box-shadow:var(--shadow-md)}
+.calendar-month h4{font-size:1rem;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.calendar-month h4 span:last-child{font-size:.75rem;font-weight:600;color:var(--text-muted);background:var(--surface-2);padding:3px 10px;border-radius:100px}
+.calendar-trip{padding:10px 12px;border-radius:10px;background:var(--surface-2);margin-bottom:8px;font-size:.82rem;cursor:pointer;transition:var(--transition);border-left:3px solid var(--primary)}
+.calendar-trip:hover{background:rgba(10,110,92,.08);transform:translateX(4px)}
+.calendar-trip .d{font-weight:800;color:var(--primary);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.calendar-trip .t{font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+@media (max-width:1100px){.scanner-layout{grid-template-columns:1fr}}
+@media (max-width:900px){
+  .admin-tabs{padding:0 16px}
+  .admin-content{padding:20px 16px}
+  .form-row{grid-template-columns:1fr}
+  #overviewGrid{grid-template-columns:1fr !important}
+  .admin-topbar{padding:0 16px}
+}
+@media (max-width:600px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .stat-card{padding:18px}
+  .stat-card .val{font-size:1.6rem}
+  .trip-admin-row{flex-wrap:wrap}
+  .trip-admin-row .actions{width:100%}
+  .toast-container{right:12px;left:12px;top:80px}
+  .toast{min-width:0}
+  .modal-body,.modal-header,.modal-footer{padding-left:20px;padding-right:20px}
+}
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></symbol>
+  <symbol id="i-calendar-view" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><rect x="7" y="13" width="3" height="3"/><rect x="14" y="13" width="3" height="3"/><rect x="7" y="18" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/></symbol>
+</svg>
+
+<!-- Login -->
+<div class="admin-login" id="adminLogin" style="display:grid">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="mark" id="loginMark"></div>
+      <h2>Panel de Administración</h2>
+      <p id="loginCompanyName">Turismo Alpe</p>
+    </div>
+    <div class="form-group"><label>Usuario</label><input type="text" class="form-control" id="adminUser" placeholder="admin" autocomplete="username"></div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" class="form-control" id="adminPass" placeholder="••••••••" autocomplete="current-password" onkeypress="if(event.key==='Enter')doLogin()">
+      <div class="form-hint">Demo: <b>admin</b> / <b>turismo2025</b></div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="doLogin()" style="padding:14px;margin-top:8px"><svg class="icon" width="18" height="18"><use href="#i-check"/></svg> Entrar</button>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="admin-shell" id="adminDashboard" style="display:none">
+  <div class="admin-topbar">
+    <div class="brand">
+      <span class="logo-text" id="topbarName">Turismo</span>
+      <div class="logo-mark" id="topbarLogo"></div>
+      <span class="badge">Admin</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="btn-text ghost" onclick="openCmdk()"><svg class="icon" width="16" height="16"><use href="#i-search"/></svg> Buscar</button>
+      <div class="admin-user"><div class="avatar">A</div><span>Admin</span></div>
+      <button class="btn btn-outline" onclick="doLogout()" style="padding:8px 14px;font-size:.85rem"><svg class="icon" width="16" height="16"><use href="#i-logout"/></svg> Salir</button>
+    </div>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-tab="overview"><svg class="icon" width="16" height="16"><use href="#i-chart"/></svg> Inicio</button>
+    <button class="admin-tab" data-tab="trips"><svg class="icon" width="16" height="16"><use href="#i-package"/></svg> Viajes</button>
+    <button class="admin-tab" data-tab="calendar"><svg class="icon" width="16" height="16"><use href="#i-calendar-view"/></svg> Calendario</button>
+    <button class="admin-tab" data-tab="reservations"><svg class="icon" width="16" height="16"><use href="#i-users"/></svg> Reservaciones</button>
+    <button class="admin-tab" data-tab="scanner"><svg class="icon" width="16" height="16"><use href="#i-qr"/></svg> Escanear QR</button>
+  </div>
+
+  <div class="admin-content">
+    <!-- OVERVIEW -->
+    <div class="admin-view active" id="view-overview">
+      <div id="expiryAlertContainer"></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="lbl">Reservaciones totales</div><div class="val" id="statTotal">0</div><div class="sub">Histórico</div></div>
+        <div class="stat-card accent"><div class="lbl">Pendientes</div><div class="val" id="statPending">0</div><div class="sub">Por confirmar</div></div>
+        <div class="stat-card"><div class="lbl">Confirmadas</div><div class="val" id="statConfirmed">0</div><div class="sub">Confirmadas</div></div>
+        <div class="stat-card gold"><div class="lbl">Ingresos estimados</div><div class="val" id="statRevenue">$0</div><div class="sub">MXN</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;margin-bottom:24px" id="overviewGrid">
+        <div class="panel">
+          <div class="panel-head"><h3>Reservaciones recientes</h3><button class="btn-text ghost" onclick="switchTab('reservations')">Ver todas</button></div>
+          <div class="panel-body" id="recentReservations" style="padding:0"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Viajes más reservados</h3></div>
+          <div class="panel-body" id="topTrips"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Ingresos por mes</h3></div>
+        <div class="panel-body"><div class="chart-container"><canvas id="revenueChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- TRIPS -->
+    <div class="admin-view" id="view-trips">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Gestión de viajes</h3>
+          <div class="panel-toolbar">
+            <input type="text" class="form-control" id="tripSearch" placeholder="Buscar viaje..." style="width:220px;padding:8px 12px" oninput="renderAdminTrips()">
+            <button class="btn btn-primary" onclick="openTripForm()"><svg class="icon" width="16" height="16"><use href="#i-plus"/></svg> Nuevo viaje</button>
+          </div>
+        </div>
+        <div class="panel-body" id="adminTripsList"></div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="admin-view" id="view-calendar">
+      <div class="panel">
+        <div class="panel-head"><h3>Calendario de viajes por mes</h3></div>
+        <div class="panel-body" id="calendarView"></div>
+      </div>
+    </div>
+
+    <!-- RESERVATIONS -->
+    <div class="admin-view" id="view-reservations">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Reservaciones</h3>
+          <div class="panel-toolbar">
+            <select class="form-control" id="resStatusFilter" onchange="renderAdminReservations()" style="width:auto;padding:8px 12px">
+              <option value="">Todos los estados</option>
+              <option value="pending">Pendientes</option>
+              <option value="confirmed">Confirmadas</option>
+              <option value="cancelled">Canceladas</option>
+            </select>
+            <select class="form-control" id="resTripFilter" onchange="renderAdminReservations()" style="width:auto;padding:8px 12px">
+              <option value="">Todos los viajes</option>
+            </select>
+            <input type="text" class="form-control" id="resSearch" placeholder="Buscar cliente, código, teléfono..." style="width:240px;padding:8px 12px" oninput="renderAdminReservations()">
+            <button class="btn-text ghost" onclick="exportCSV()"><svg class="icon" width="14" height="14"><use href="#i-download"/></svg> CSV</button>
+          </div>
+        </div>
+        <div class="date-filter-row" style="padding:12px 24px;border-bottom:1px solid var(--border)">
+          <label style="font-weight:600">Rango de fechas:</label>
+          <input type="date" id="resDateFrom" onchange="renderAdminReservations()">
+          <span>—</span>
+          <input type="date" id="resDateTo" onchange="renderAdminReservations()">
+          <button class="btn-text ghost" onclick="clearDateFilter()" style="margin-left:8px">Limpiar</button>
+        </div>
+        <div class="table-wrap" id="adminReservationsTable"></div>
+      </div>
+    </div>
+
+    <!-- SCANNER -->
+    <div class="admin-view" id="view-scanner">
+      <div class="panel" style="margin-bottom:20px">
+        <div class="panel-head"><h3>Escáner de códigos QR — Verificación de asistencia</h3></div>
+        <div class="panel-body">
+          <p style="color:var(--text-muted);font-size:.92rem;margin-bottom:20px">
+            Escanea el código QR del comprobante del cliente para verificar su reserva el día del viaje.
+            También puedes ingresar el código manualmente.
+          </p>
+          <div class="scanner-layout">
+            <div>
+              <div class="scanner-viewport" id="scannerViewport">
+                <div class="placeholder" id="scannerPlaceholder">
+                  <div class="icon-big"><svg class="icon" width="40" height="40"><use href="#i-camera"/></svg></div>
+                  <p style="font-size:.95rem;font-weight:600;margin-bottom:6px">Cámara inactiva</p>
+                  <p style="font-size:.85rem">Pulsa "Iniciar cámara" para escanear</p>
+                </div>
+                <div id="reader"></div>
+              </div>
+              <div class="scanner-actions">
+                <button class="btn btn-primary" id="startScannerBtn" onclick="startScanner()"><svg class="icon" width="16" height="16"><use href="#i-camera"/></svg> Iniciar cámara</button>
+                <button class="btn btn-outline" id="stopScannerBtn" onclick="stopScanner()" style="display:none"><svg class="icon" width="16" height="16"><use href="#i-eye-off"/></svg> Detener</button>
+              </div>
+              <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
+                <label style="display:block;font-size:.85rem;font-weight:600;margin-bottom:8px">O ingresa el código manualmente:</label>
+                <div style="display:flex;gap:8px">
+                  <input type="text" class="form-control mono" id="manualCode" placeholder="Ej. R-LX5K2ABC" style="text-transform:uppercase" onkeypress="if(event.key==='Enter')verifyManual()">
+                  <button class="btn btn-primary" onclick="verifyManual()">Verificar</button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4 style="font-size:1.05rem;font-weight:800;margin-bottom:12px">Resultado</h4>
+              <div class="scan-result" id="scanResult">
+                <div style="text-align:center;padding:40px 20px;color:var(--text-muted)">
+                  <div style="width:64px;height:64px;margin:0 auto 12px;background:var(--bg);border-radius:18px;display:grid;place-items:center"><svg class="icon" width="30" height="30"><use href="#i-qr"/></svg></div>
+                  <p style="font-size:.9rem">Esperando escaneo...</p>
+                </div>
+              </div>
+              <h4 style="font-size:.95rem;font-weight:800;margin:24px 0 12px">Últimos escaneos</h4>
+              <div id="scanHistory" style="font-size:.85rem;color:var(--text-muted);text-align:center;padding:16px">Sin escaneos aún</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VIAJE -->
+<div class="modal-overlay" id="tripModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="tripFormTitle">Nuevo viaje</h2>
+      <button class="modal-close" onclick="closeTripForm()">
+        <svg class="icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tripFormId">
+      <div class="form-group"><label>Título del viaje <span class="req">*</span></label><input type="text" class="form-control" id="tTitle"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Destino <span class="req">*</span></label><input type="text" class="form-control" id="tDestination"></div>
+        <div class="form-group"><label>Categoría <span class="req">*</span></label><select class="form-control" id="tCategory"><option value="1día">1 día</option><option value="fin de semana">Fin de semana</option><option value="varios días">Varios días</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Fecha de salida <span class="req">*</span></label><input type="date" class="form-control" id="tDate"></div>
+        <div class="form-group"><label>Texto de fecha visible</label><input type="text" class="form-control" id="tDateText" placeholder="Sábado 26 de Septiembre"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Precio adulto (MXN) <span class="req">*</span></label><input type="number" class="form-control" id="tPrice" min="0"></div>
+        <div class="form-group"><label>Precio niño (MXN)</label><input type="number" class="form-control" id="tPriceChild" min="0"></div>
+      </div>
+      <div class="form-group">
+        <label>Imagen principal <span class="req">*</span></label>
+        <div class="image-upload">
+          <div class="image-preview" id="imagePreview"><svg class="icon" width="32" height="32"><use href="#i-image"/></svg></div>
+          <div class="upload-info">
+            <h5>Sube una imagen de tu equipo</h5>
+            <p>JPG, PNG o WEBP. Máximo 800 KB.</p>
+            <div class="upload-actions">
+              <input type="file" id="tImageFile" accept="image/*" style="display:none" onchange="handleImageUpload(this)">
+              <button type="button" class="btn-text primary" onclick="document.getElementById('tImageFile').click()"><svg class="icon" width="14" height="14"><use href="#i-upload"/></svg> Subir imagen</button>
+              <button type="button" class="btn-text ghost" onclick="clearTripImage()"><svg class="icon" width="14" height="14"><use href="#i-trash"/></svg> Quitar</button>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="tImage">
+      </div>
+      <div class="form-group"><label>Descripción <span class="req">*</span></label><textarea class="form-control" id="tDescription"></textarea></div>
+      <div class="form-group"><label>Qué incluye (separado por comas)</label><textarea class="form-control" id="tIncludes"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Duración</label><input type="text" class="form-control" id="tDuration" placeholder="1 día, 2 días 1 noche"></div>
+        <div class="form-group"><label>Capacidad máxima</label><input type="number" class="form-control" id="tCapacity" min="1" placeholder="40"></div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:12px">
+          <span class="switch"><input type="checkbox" id="tHasRooms" onchange="toggleRoomOptions()"><span class="slider"></span></span>
+          <span>Este viaje permite elegir tipo de habitación</span>
+        </label>
+      </div>
+      <div id="roomOptionsSection" style="display:none">
+        <div class="room-options">
+          <div class="room-options-title"><svg class="icon" width="16" height="16"><use href="#i-home"/></svg> Precio por tipo de habitación (MXN, por adulto)</div>
+          <div class="form-hint" style="margin-top:-8px;margin-bottom:12px">Deja en 0 o vacío para no mostrar esa opción.</div>
+          <div class="room-option-row"><label>Doble 1 cama (matrimonial)</label><input type="number" id="roomDbl1" min="0" placeholder="0"></div>
+          <div class="room-option-row"><label>Doble 2 camas</label><input type="number" id="roomDbl2" min="0" placeholder="0"></div>
+          <div class="room-option-row"><label>Triple</label><input type="number" id="roomTpl" min="0" placeholder="0"></div>
+          <div class="room-option-row"><label>Cuádruple</label><input type="number" id="roomCpl" min="0" placeholder="0"></div>
+          <div class="room-option-row"><label>Sencilla (individual)</label><input type="number" id="roomSencilla" min="0" placeholder="0"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;padding-top:16px">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer"><span class="switch"><input type="checkbox" id="tFeatured"><span class="slider"></span></span><span style="font-weight:500;font-size:.9rem">Destacar como popular</span></label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer"><span class="switch"><input type="checkbox" id="tAvailable" checked><span class="slider"></span></span><span style="font-weight:500;font-size:.9rem">Disponible para reserva</span></label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeTripForm()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveTrip()">Guardar viaje</button>
+    </div>
+  </div>
+</div>
+
+<!-- Paleta de comandos -->
+<div class="cmdk-overlay" id="cmdkOverlay" onclick="if(event.target===this)closeCmdk()">
+  <div class="cmdk">
+    <div class="cmdk-input">
+      <svg class="icon" width="20" height="20" style="color:var(--text-muted)"><use href="#i-search"/></svg>
+      <input type="text" id="cmdkInput" placeholder="Buscar reservas, viajes, acciones..." oninput="renderCmdkResults()" onkeydown="handleCmdkKey(event)">
+      <span class="kbd">ESC</span>
+    </div>
+    <div class="cmdk-results" id="cmdkResults"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const COMPANY_LOGO_FILE = 'Logotipoalpe.png';
+const KEYS = { trips:'ta_trips_v1', reservations:'ta_reservations_v1', settings:'ta_settings_v1', session:'ta_admin_session', scanHistory:'ta_scan_history_v1' };
+const ADMIN_CREDENTIALS = { user:'admin', pass:'turismo2025' };
+
+const DEFAULT_SETTINGS = {
+  companyName:'Turismo Alpe', phone:'+52 55 8931 5831',
+  whatsapp:'5215513356558', email:'turialpe@hotmail.com',
+  address:'Av. Prolongación Div. del Norte #5341, San Bernardino, Xochimilco, CDMX',
+  policy:'Cancelaciones con más de 7 días de anticipación: reembolso del 100%. Entre 3 y 7 días: 50%. Menos de 72 horas: sin reembolso.'
+};
+
+const DEFAULT_TRIPS = [
+  { id:'t1', title:'Tlalpujahua y Mina Dos Estrellas', destination:'Michoacán', category:'1día', date:'2025-09-26', dateText:'Sábado 26 de Septiembre', price:920, priceChild:870, hasRooms:false, image:'https://static.wixstatic.com/media/5f00b6_57e1a4d888df439d9eeb21dbd965a4d4~mv2.jpg/v1/crop/x_0,y_0,w_880,h_550/fill/w_592,h_362,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/tlalpujahua-pueblo-magico.jpg', description:'Vive una experiencia inolvidable en Tlalpujahua y la Mina Dos Estrellas.', includes:['Transporte redondo','Té o café','Lunch','Entrada a la Mina','Coordinador'], duration:'1 día', capacity:40, featured:true, available:true },
+  { id:'t2', title:'Fin de semana en Zacatlán y Chignahuapan', destination:'Puebla', category:'fin de semana', date:'2025-10-03', dateText:'Del 3 al 4 de Octubre', price:2600, priceChild:2150, hasRooms:true, roomOptions:{ dbl1:2600, dbl2:2900, tpl:2700, cpl:2600 }, image:'https://static.wixstatic.com/media/5f00b6_45eac1971e4149f7a9fab8d2741d6f47~mv2.jpg/v1/crop/x_0,y_76,w_870,h_543/fill/w_592,h_362,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/image_870x_651e5b44c649d.jpg', description:'Visita la Cascada de las Brisas, Zacatlán y Chignahuapan.', includes:['Transporte redondo','Té y café','Desayuno lunch','1 desayuno buffet','1 noche hospedaje','Entrada Cascada','Coordinador'], duration:'2 días 1 noche', capacity:40, featured:true, available:true },
+  { id:'t3', title:'Mineral del Chico, Presa El Cedral y Santa María Amajac', destination:'Hidalgo', category:'fin de semana', date:'2025-10-10', dateText:'Del 10 al 11 de Octubre', price:2200, priceChild:1500, hasRooms:true, roomOptions:{ dbl1:2200, dbl2:2300, tpl:2100, cpl:2000 }, image:'https://static.wixstatic.com/media/5f00b6_e90bc3bf52d745568b6ac72763a18053~mv2.jpg/v1/crop/x_0,y_37,w_730,h_456/fill/w_592,h_362,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/mineral-del-chico.jpg', description:'Presa El Cedral, Mineral del Chico y aguas termales.', includes:['Transporte redondo','Té y café','Desayuno lunch','1 noche hospedaje','Entrada balneario','Recorrido camioncito','Coordinador'], duration:'2 días 1 noche', capacity:40, featured:false, available:true },
+  { id:'t4', title:'Prismas Basálticos, Huasca y San Miguel Regla', destination:'Hidalgo', category:'1día', date:'2025-11-07', dateText:'Sábado 7 de Noviembre', price:1190, priceChild:1000, hasRooms:false, image:'https://static.wixstatic.com/media/5f00b6_573b8e9893f44920920264970211cc33~mv2.jpg/v1/crop/x_0,y_23,w_1300,h_811/fill/w_592,h_362,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/PRISMAS.jpg', description:'Prismas Basálticos, Huasca de Ocampo y San Miguel Regla.', includes:['Transporte redondo','Té y café','Box lunch','Entrada Prismas','Recorrido teatralizado','Coordinador'], duration:'1 día', capacity:40, featured:false, available:true },
+  { id:'t5', title:'San Juan de los Lagos, Tequila y Tonalá', destination:'Jalisco', category:'varios días', date:'2025-11-19', dateText:'Del 19 al 22 de Noviembre', price:4350, priceChild:3600, hasRooms:true, roomOptions:{ dbl1:4350, dbl2:4550, tpl:4350, cpl:4150 }, image:'https://static.wixstatic.com/media/5f00b6_561b6eb4ef54420dab72f1c45bef1ff9~mv2.jpg/v1/fill/w_592,h_362,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/SAN%20JUAN.jpg', description:'Tradición, fe y cultura. Santo Toribio Romo, Tequila y Tonalá.', includes:['Transporte redondo','Té y café','2 noches hospedaje','2 desayunos buffet','Recorrido Tequila','Coordinador'], duration:'4 días 3 noches', capacity:40, featured:true, available:true },
+  { id:'t6', title:'Guayabitos y Tlaquepaque', destination:'Nayarit', category:'varios días', date:'2025-12-19', dateText:'Del 19 al 23 de Diciembre', price:11750, priceChild:7300, hasRooms:true, roomOptions:{ dbl1:11750, dbl2:11750, tpl:11750, cpl:11000 }, image:'https://static.wixstatic.com/media/5f00b6_c8d0ac333eef4557be13c1323ba0cd7a~mv2.png/v1/fill/w_592,h_362,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/guayabitos%20ESPECIAL.png', description:'Playa Guayabitos todo incluido y Tlaquepaque.', includes:['Transporte redondo','Té y café','3 noches hospedaje','4 desayunos','3 comidas','3 cenas','Barra libre','Snacks','Coordinador'], duration:'5 días 4 noches', capacity:40, featured:true, available:true },
+];
+
+let trips = [], reservations = [], settings = {...DEFAULT_SETTINGS};
+let revenueChart = null, html5QrCode = null, isScanning = false, scanHistory = [];
+let cmdkSelection = 0, cmdkItems = [];
+
+function loadData(){
+  try {
+    const raw = localStorage.getItem(KEYS.trips);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if(Array.isArray(parsed) && parsed.length > 0 && parsed.every(t => t && t.id && t.title)){
+      trips = parsed;
+    } else {
+      trips = JSON.parse(JSON.stringify(DEFAULT_TRIPS));
+      localStorage.setItem(KEYS.trips, JSON.stringify(trips));
+    }
+  } catch(e){ trips = JSON.parse(JSON.stringify(DEFAULT_TRIPS)); }
+  try { reservations = JSON.parse(localStorage.getItem(KEYS.reservations)) || []; if(!Array.isArray(reservations)) reservations = []; } catch(e){ reservations = []; }
+  try { const raw = localStorage.getItem(KEYS.settings); settings = raw ? {...DEFAULT_SETTINGS, ...JSON.parse(raw)} : {...DEFAULT_SETTINGS}; } catch(e){ settings = {...DEFAULT_SETTINGS}; }
+  try { scanHistory = JSON.parse(localStorage.getItem(KEYS.scanHistory)) || []; if(!Array.isArray(scanHistory)) scanHistory = []; } catch(e){ scanHistory = []; }
+}
+
+function applyBranding(){
+  const html = `<img src="${COMPANY_LOGO_FILE}" alt="${escapeHtml(settings.companyName)}" onerror="this.style.display='none'">`;
+  const loginMark = document.getElementById('loginMark'); if(loginMark) loginMark.innerHTML = html;
+  const topbarLogo = document.getElementById('topbarLogo'); if(topbarLogo) topbarLogo.innerHTML = html;
+  const topbarName = document.getElementById('topbarName'); if(topbarName) topbarName.textContent = 'Turismo';
+  const loginCompanyName = document.getElementById('loginCompanyName'); if(loginCompanyName) loginCompanyName.textContent = settings.companyName;
+  document.title = 'Admin · ' + settings.companyName;
+}
+
+function doLogin(){
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value;
+  if(u === ADMIN_CREDENTIALS.user && p === ADMIN_CREDENTIALS.pass){
+    sessionStorage.setItem(KEYS.session, 'active');
+    showDashboard(); toast('Bienvenido, Admin', 'success');
+  } else { toast('Credenciales incorrectas', 'error'); }
+}
+function doLogout(){
+  sessionStorage.removeItem(KEYS.session);
+  document.getElementById('adminLogin').style.display = 'grid';
+  document.getElementById('adminDashboard').style.display = 'none';
+  document.getElementById('adminUser').value = '';
+  document.getElementById('adminPass').value = '';
+  stopScanner();
+  toast('Sesión cerrada', 'warning');
+}
+function showDashboard(){
+  document.getElementById('adminLogin').style.display = 'none';
+  document.getElementById('adminDashboard').style.display = 'flex';
+  loadData(); applyBranding(); populateResTripFilter(); renderOverview();
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.admin-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+tab).classList.add('active');
+  if(tab==='overview') renderOverview();
+  if(tab==='trips') renderAdminTrips();
+  if(tab==='calendar') renderCalendar();
+  if(tab==='reservations') renderAdminReservations();
+  if(tab==='scanner') renderScanHistory();
+  if(tab !== 'scanner') stopScanner();
+}
+
+function renderOverview(){
+  renderExpiryAlert();
+  const total = reservations.length;
+  const pending = reservations.filter(r=>r.status==='pending').length;
+  const confirmed = reservations.filter(r=>r.status==='confirmed').length;
+  const revenue = reservations.filter(r=>r.status!=='cancelled').reduce((s,r)=>s+(r.total||0),0);
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statConfirmed').textContent = confirmed;
+  document.getElementById('statRevenue').textContent = '$' + revenue.toLocaleString();
+
+  const recent = reservations.slice(0,5);
+  const container = document.getElementById('recentReservations');
+  if(recent.length === 0){
+    container.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted)"><p>Aún no hay reservaciones</p></div>`;
+  } else {
+    container.innerHTML = `<table><thead><tr><th>Cliente</th><th>Viaje</th><th>Total</th><th>Estado</th></tr></thead><tbody>${recent.map(r=>`<tr><td><b>${escapeHtml(r.customerName)}</b><br><small style="color:var(--text-muted)">${escapeHtml(r.phone)}</small></td><td><small>${escapeHtml(r.tripTitle)}</small></td><td><b>$${(r.total||0).toLocaleString()}</b></td><td>${statusBadge(r.status)}</td></tr>`).join('')}</tbody></table>`;
+  }
+
+  const counts = {}; reservations.forEach(r=>{ counts[r.tripId] = (counts[r.tripId]||0)+1; });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const top = document.getElementById('topTrips');
+  if(sorted.length === 0){ top.innerHTML = `<p style="color:var(--text-muted);text-align:center;padding:20px">Sin datos aún</p>`; }
+  else {
+    const max = sorted[0][1];
+    top.innerHTML = sorted.map(([id,count])=>{
+      const t = trips.find(x=>x.id===id); const title = t ? t.title : 'Viaje eliminado'; const pct = (count/max)*100;
+      return `<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:6px"><span style="font-weight:600">${escapeHtml(title.length>32?title.slice(0,32)+'...':title)}</span><span style="color:var(--primary);font-weight:700">${count}</span></div><div style="height:8px;background:var(--bg);border-radius:100px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:100px;transition:width .8s ease"></div></div></div>`;
+    }).join('');
+  }
+  renderRevenueChart();
+}
+
+function renderExpiryAlert(){
+  const container = document.getElementById('expiryAlertContainer'); if(!container) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const expired = trips.filter(t => {
+    if(!t.date || t.available === false) return false;
+    const tripDate = new Date(t.date + 'T23:59:59');
+    return tripDate < today;
+  });
+  if(expired.length === 0){ container.innerHTML = ''; return; }
+  container.innerHTML = `
+    <div class="expiry-alert">
+      <div class="alert-icon"><svg class="icon" width="24" height="24"><use href="#i-alert"/></svg></div>
+      <div class="alert-body">
+        <div class="alert-title"><svg class="icon" width="18" height="18"><use href="#i-clock"/></svg> ${expired.length} viaje${expired.length>1?'s':''} caducado${expired.length>1?'s':''}</div>
+        <div class="alert-desc">Ya pasó la fecha de salida pero siguen visibles al público. Te recomendamos ocultarlos o extender su fecha.</div>
+        <div class="alert-list">
+          ${expired.map(t=>`
+            <div class="expiry-item">
+              <div class="info">
+                <div class="title">${escapeHtml(t.title)}</div>
+                <div class="date">${escapeHtml(t.dateText || formatDate(t.date))}</div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <button class="btn-mini ghost" onclick="extendTrip('${t.id}')">Extender</button>
+                <button class="btn-mini" onclick="hideExpiredTrip('${t.id}')">Ocultar</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function hideExpiredTrip(id){
+  const idx = trips.findIndex(t=>t.id===id);
+  if(idx === -1) return;
+  trips[idx].available = false;
+  localStorage.setItem(KEYS.trips, JSON.stringify(trips));
+  renderOverview(); renderAdminTrips();
+  toast('Viaje ocultado', 'success');
+}
+
+function extendTrip(id){
+  const t = trips.find(x=>x.id===id); if(!t) return;
+  const newDate = prompt(`Nueva fecha para "${t.title}" (AAAA-MM-DD):`, t.date);
+  if(!newDate) return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(newDate)){ toast('Fecha inválida', 'error'); return; }
+  const idx = trips.findIndex(x=>x.id===id);
+  trips[idx].date = newDate;
+  trips[idx].dateText = formatDate(newDate);
+  localStorage.setItem(KEYS.trips, JSON.stringify(trips));
+  renderOverview(); renderAdminTrips();
+  toast('Fecha actualizada', 'success');
+}
+
+function renderRevenueChart(){
+  const ctx = document.getElementById('revenueChart'); if(!ctx) return;
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const data = new Array(12).fill(0);
+  reservations.filter(r=>r.status!=='cancelled').forEach(r=>{ const d = new Date(r.createdAt); data[d.getMonth()] += (r.total||0); });
+  if(revenueChart) revenueChart.destroy();
+  revenueChart = new Chart(ctx, { type:'line', data:{ labels:months, datasets:[{ label:'Ingresos MXN', data, borderColor:'#0a6e5c', backgroundColor:'rgba(10,110,92,.08)', fill:true, tension:.4, pointBackgroundColor:'#0a6e5c', pointRadius:4 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ callback:v=>'$'+v.toLocaleString() }, grid:{ color:'rgba(0,0,0,.04)' } }, x:{ grid:{ display:false } } } } });
+}
+
+function statusBadge(status){
+  const labels = { pending:'Pendiente', confirmed:'Confirmada', cancelled:'Cancelada', 'checked-in':'Asistió' };
+  return `<span class="status-badge ${status}">${labels[status]||status}</span>`;
+}
+
+function isExpired(t){
+  if(!t.date) return false;
+  const tripDate = new Date(t.date + 'T23:59:59');
+  return tripDate < new Date();
+}
+
+function renderAdminTrips(){
+  const q = (document.getElementById('tripSearch').value||'').toLowerCase().trim();
+  let list = trips;
+  if(q) list = list.filter(t => t.title.toLowerCase().includes(q) || t.destination.toLowerCase().includes(q));
+  const container = document.getElementById('adminTripsList');
+  if(list.length === 0){
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)"><p>No hay viajes ${q?'que coincidan':'registrados'}</p></div>`;
+    return;
+  }
+  container.innerHTML = list.map(t=>{
+    const count = reservations.filter(r=>r.tripId===t.id).length;
+    const sold = reservations.filter(r => r.tripId === t.id && r.status !== 'cancelled').reduce((s,r)=>s+r.adults+r.children, 0);
+    const cap = t.capacity || 40;
+    const occPct = Math.min(100, (sold/cap)*100);
+    const expired = isExpired(t);
+    const expiredTag = expired && t.available !== false ? `<span class="expired-tag"><svg class="icon" width="10" height="10"><use href="#i-alert"/></svg> Caducado</span>` : '';
+    return `<div class="trip-admin-row ${expired ? 'expired' : ''}">
+      <img src="${t.image}" alt="" onerror="this.src='https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=200&q=80'">
+      <div class="info">
+        <h4>${escapeHtml(t.title)} ${expiredTag}</h4>
+        <p>
+          <span><svg class="icon" width="12" height="12"><use href="#i-map"/></svg> ${escapeHtml(t.destination)}</span>
+          <span><svg class="icon" width="12" height="12"><use href="#i-cal"/></svg> ${escapeHtml(t.dateText || formatDate(t.date))}</span>
+          <span><svg class="icon" width="12" height="12"><use href="#i-tag"/></svg> $${(t.price||0).toLocaleString()}</span>
+          <span><svg class="icon" width="12" height="12"><use href="#i-users"/></svg> ${count} reservas</span>
+          ${t.hasRooms ? `<span style="color:var(--primary);font-weight:600"><svg class="icon" width="12" height="12"><use href="#i-home"/></svg> Habitaciones</span>` : ''}
+          <span style="color:${t.available?'var(--success)':'var(--danger)'}">● ${t.available?'Disponible':'Oculto'}</span>
+        </p>
+        ${sold > 0 ? `<div style="font-size:.75rem;color:var(--text-muted);margin-top:6px;display:flex;align-items:center;gap:8px"><span>${sold}/${cap}</span><div class="occupancy-mini"><div class="fill" style="width:${occPct}%"></div></div></div>` : ''}
+      </div>
+      <div class="actions">
+        <button class="btn-text ghost" onclick="openTripForm('${t.id}')" title="Editar"><svg class="icon" width="14" height="14"><use href="#i-edit"/></svg> Editar</button>
+        <button class="btn-text ghost" onclick="duplicateTrip('${t.id}')" title="Duplicar"><svg class="icon" width="14" height="14"><use href="#i-copy"/></svg> Duplicar</button>
+        <button class="btn-text ghost" onclick="exportTripReservations('${t.id}')" title="Exportar reservas"><svg class="icon" width="14" height="14"><use href="#i-download"/></svg> CSV</button>
+        <button class="btn-text ${t.available?'warn':'success'}" onclick="toggleTripAvailable('${t.id}')" title="${t.available?'Ocultar':'Mostrar'}"><svg class="icon" width="14" height="14"><use href="#i-${t.available?'eye-off':'eye'}"/></svg> ${t.available?'Ocultar':'Mostrar'}</button>
+        <button class="btn-text danger" onclick="deleteTrip('${t.id}')" title="Eliminar"><svg class="icon" width="14" height="14"><use href="#i-trash"/></svg> Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function duplicateTrip(id){
+  const t = trips.find(x=>x.id===id); if(!t) return;
+  const clone = JSON.parse(JSON.stringify(t));
+  clone.id = 't' + Date.now().toString(36);
+  clone.title = t.title + ' (copia)';
+  clone.available = false;
+  trips.unshift(clone);
+  localStorage.setItem(KEYS.trips, JSON.stringify(trips));
+  renderAdminTrips(); renderOverview();
+  toast('Viaje duplicado (inicia oculto)', 'success');
+}
+
+function exportTripReservations(id){
+  const t = trips.find(x=>x.id===id); if(!t) return;
+  const list = reservations.filter(r => r.tripId === id);
+  if(list.length === 0){ toast('Este viaje no tiene reservas', 'warning'); return; }
+  const headers = ['Código','Cliente','Email','Teléfono','Adultos','Niños','Habitación','Total','Método pago','Estado','Asistió','Fecha reserva'];
+  const rows = list.map(r=>[r.id, r.customerName, r.email, r.phone, r.adults, r.children, r.hasRooms ? roomLabel(r.room) : '', r.total, r.paymentMethod||'cash', r.status, r.checkedIn ? 'Sí' : 'No', new Date(r.createdAt).toLocaleString('es-MX')]);
+  const csv = [headers, ...rows].map(row=>row.map(cell=>`"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `reservas_${t.title.slice(0,30).replace(/[^\w]/g,'_')}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url); toast('CSV exportado', 'success');
+}
+
+function toggleRoomOptions(){
+  const has = document.getElementById('tHasRooms').checked;
+  document.getElementById('roomOptionsSection').style.display = has ? 'block' : 'none';
+}
+
+function handleImageUpload(input){
+  const file = input.files[0]; if(!file) return;
+  if(!file.type.startsWith('image/')){ toast('Selecciona una imagen válida', 'error'); return; }
+  if(file.size > 800 * 1024){ toast('Máximo 800 KB', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('tImage').value = e.target.result;
+    document.getElementById('imagePreview').innerHTML = `<img src="${e.target.result}" alt="">`;
+    toast('Imagen cargada', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+function clearTripImage(){
+  document.getElementById('tImage').value = '';
+  document.getElementById('imagePreview').innerHTML = '<svg class="icon" width="32" height="32"><use href="#i-image"/></svg>';
+  document.getElementById('tImageFile').value = '';
+}
+
+function openTripForm(id){
+  const modal = document.getElementById('tripModal');
+  modal.classList.add('active');
+  if(id){
+    const t = trips.find(x=>x.id===id); if(!t) return;
+    document.getElementById('tripFormTitle').textContent = 'Editar viaje';
+    document.getElementById('tripFormId').value = t.id;
+    document.getElementById('tTitle').value = t.title;
+    document.getElementById('tDestination').value = t.destination;
+    document.getElementById('tCategory').value = t.category;
+    document.getElementById('tDate').value = t.date;
+    document.getElementById('tDateText').value = t.dateText || '';
+    document.getElementById('tPrice').value = t.price;
+    document.getElementById('tPriceChild').value = t.priceChild || '';
+    document.getElementById('tImage').value = t.image;
+    document.getElementById('imagePreview').innerHTML = t.image ? `<img src="${t.image}" alt="">` : '<svg class="icon" width="32" height="32"><use href="#i-image"/></svg>';
+    document.getElementById('tDescription').value = t.description;
+    document.getElementById('tIncludes').value = (t.includes||[]).join(', ');
+    document.getElementById('tDuration').value = t.duration || '';
+    document.getElementById('tCapacity').value = t.capacity || '';
+    document.getElementById('tFeatured').checked = !!t.featured;
+    document.getElementById('tAvailable').checked = t.available !== false;
+    document.getElementById('tHasRooms').checked = !!t.hasRooms;
+    const ro = t.roomOptions || {};
+    document.getElementById('roomDbl1').value = ro.dbl1 || '';
+    document.getElementById('roomDbl2').value = ro.dbl2 || '';
+    document.getElementById('roomTpl').value = ro.tpl || '';
+    document.getElementById('roomCpl').value = ro.cpl || '';
+    document.getElementById('roomSencilla').value = ro.sencilla || '';
+    toggleRoomOptions();
+  } else {
+    document.getElementById('tripFormTitle').textContent = 'Nuevo viaje';
+    document.getElementById('tripFormId').value = '';
+    ['tTitle','tDestination','tDateText','tPrice','tPriceChild','tDescription','tIncludes','tDuration','tCapacity','roomDbl1','roomDbl2','roomTpl','roomCpl','roomSencilla'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('tCategory').value = '1día';
+    document.getElementById('tDate').value = '';
+    document.getElementById('tFeatured').checked = false;
+    document.getElementById('tAvailable').checked = true;
+    document.getElementById('tHasRooms').checked = false;
+    clearTripImage();
+    toggleRoomOptions();
+  }
+}
+function closeTripForm(){ document.getElementById('tripModal').classList.remove('active'); }
+
+function saveTrip(){
+  const id = document.getElementById('tripFormId').value;
+  const title = document.getElementById('tTitle').value.trim();
+  const destination = document.getElementById('tDestination').value.trim();
+  const category = document.getElementById('tCategory').value;
+  const date = document.getElementById('tDate').value;
+  const dateText = document.getElementById('tDateText').value.trim();
+  const price = parseFloat(document.getElementById('tPrice').value);
+  const priceChild = parseFloat(document.getElementById('tPriceChild').value) || 0;
+  const image = document.getElementById('tImage').value;
+  const description = document.getElementById('tDescription').value.trim();
+  const includesRaw = document.getElementById('tIncludes').value.trim();
+  const duration = document.getElementById('tDuration').value.trim();
+  const capacity = parseInt(document.getElementById('tCapacity').value)||40;
+  const featured = document.getElementById('tFeatured').checked;
+  const available = document.getElementById('tAvailable').checked;
+  const hasRooms = document.getElementById('tHasRooms').checked;
+
+  if(!title || !destination || !date || !price || !image || !description){ toast('Completa los campos obligatorios', 'error'); return; }
+  const includes = includesRaw ? includesRaw.split(',').map(s=>s.trim()).filter(Boolean) : [];
+
+  let roomOptions = null;
+  if(hasRooms){
+    const ro = {};
+    const dbl1 = parseFloat(document.getElementById('roomDbl1').value);
+    const dbl2 = parseFloat(document.getElementById('roomDbl2').value);
+    const tpl = parseFloat(document.getElementById('roomTpl').value);
+    const cpl = parseFloat(document.getElementById('roomCpl').value);
+    const sencilla = parseFloat(document.getElementById('roomSencilla').value);
+    if(dbl1 > 0) ro.dbl1 = dbl1;
+    if(dbl2 > 0) ro.dbl2 = dbl2;
+    if(tpl > 0) ro.tpl = tpl;
+    if(cpl > 0) ro.cpl = cpl;
+    if(sencilla > 0) ro.sencilla = sencilla;
+    if(Object.keys(ro).length === 0){ toast('Define al menos un precio de habitación', 'error'); return; }
+    roomOptions = ro;
+  }
+
+  if(id){
+    const idx = trips.findIndex(t=>t.id===id);
+    if(idx > -1){
+      trips[idx] = {...trips[idx], title, destination, category, date, dateText, price, priceChild, image, description, includes, duration, capacity, featured, available, hasRooms, roomOptions};
+      toast('Viaje actualizado', 'success');
+    }
+  } else {
+    trips.unshift({ id:'t'+Date.now().toString(36), title, destination, category, date, dateText, price, priceChild, image, description, includes, duration, capacity, featured, available, hasRooms, roomOptions });
+    toast('Viaje creado', 'success');
+  }
+  try { localStorage.setItem(KEYS.trips, JSON.stringify(trips)); }
+  catch(e){ toast('Sin espacio. Usa imagen más pequeña.', 'error'); return; }
+  closeTripForm(); renderAdminTrips(); renderOverview(); populateResTripFilter();
+}
+
+function deleteTrip(id){
+  const t = trips.find(x=>x.id===id); if(!t) return;
+  if(!confirm(`¿Eliminar el viaje "${t.title}"?`)) return;
+  trips = trips.filter(x=>x.id!==id);
+  localStorage.setItem(KEYS.trips, JSON.stringify(trips));
+  renderAdminTrips(); renderOverview(); populateResTripFilter(); toast('Viaje eliminado', 'warning');
+}
+function toggleTripAvailable(id){
+  const idx = trips.findIndex(t=>t.id===id); if(idx === -1) return;
+  trips[idx].available = !trips[idx].available;
+  localStorage.setItem(KEYS.trips, JSON.stringify(trips));
+  renderAdminTrips(); toast(trips[idx].available ? 'Viaje visible' : 'Viaje oculto', 'success');
+}
+
+function renderCalendar(){
+  const container = document.getElementById('calendarView'); if(!container) return;
+  const grouped = {};
+  trips.forEach(t => {
+    if(!t.date) return;
+    const [y,m] = t.date.split('-');
+    const key = `${y}-${m}`;
+    if(!grouped[key]) grouped[key] = [];
+    grouped[key].push(t);
+  });
+  const keys = Object.keys(grouped).sort();
+  if(keys.length === 0){
+    container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted)">No hay viajes con fecha</div>`;
+    return;
+  }
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  container.innerHTML = keys.map(k=>{
+    const [y,m] = k.split('-');
+    const monthName = `${meses[parseInt(m)-1]} ${y}`;
+    const items = grouped[k].sort((a,b)=> new Date(a.date) - new Date(b.date));
+    return `<div class="calendar-month">
+      <h4><span>${monthName}</span><span>${items.length} viaje${items.length>1?'s':''}</span></h4>
+      ${items.map(t => {
+        const [yy,mm,dd] = t.date.split('-');
+        const expired = isExpired(t);
+        return `<div class="calendar-trip" onclick="openTripForm('${t.id}')" style="${expired ? 'border-left-color:var(--warning);opacity:.7' : ''}">
+          <div class="d">${dd}/${mm}${expired ? '· Caducado' : ''}</div>
+          <div class="t">${escapeHtml(t.title)}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+function populateResTripFilter(){
+  const sel = document.getElementById('resTripFilter'); if(!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Todos los viajes</option>' + trips.map(t => `<option value="${t.id}">${escapeHtml(t.title)}</option>`).join('');
+  if(current) sel.value = current;
+}
+
+function clearDateFilter(){
+  document.getElementById('resDateFrom').value = '';
+  document.getElementById('resDateTo').value = '';
+  renderAdminReservations();
+}
+
+function renderAdminReservations(){
+  const statusF = document.getElementById('resStatusFilter').value;
+  const tripF = document.getElementById('resTripFilter').value;
+  const search = (document.getElementById('resSearch').value||'').toLowerCase().trim();
+  const dateFrom = document.getElementById('resDateFrom').value;
+  const dateTo = document.getElementById('resDateTo').value;
+
+  let list = reservations;
+  if(statusF) list = list.filter(r=>r.status===statusF);
+  if(tripF) list = list.filter(r => r.tripId === tripF);
+  if(dateFrom){
+    const from = new Date(dateFrom + 'T00:00:00').getTime();
+    list = list.filter(r => r.createdAt >= from);
+  }
+  if(dateTo){
+    const to = new Date(dateTo + 'T23:59:59').getTime();
+    list = list.filter(r => r.createdAt <= to);
+  }
+  if(search) list = list.filter(r =>
+    r.customerName.toLowerCase().includes(search) ||
+    r.tripTitle.toLowerCase().includes(search) ||
+    r.id.toLowerCase().includes(search) ||
+    r.phone.includes(search)
+  );
+
+  const container = document.getElementById('adminReservationsTable');
+  if(list.length === 0){
+    container.innerHTML = `<div style="padding:60px 20px;text-align:center;color:var(--text-muted)"><p>No hay reservaciones que coincidan</p></div>`;
+    return;
+  }
+  container.innerHTML = `<table><thead><tr><th>Código</th><th>Cliente</th><th>Viaje</th><th>Personas</th><th>Total</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${list.map(r=>`<tr>
+    <td><span class="mono" style="color:var(--primary);font-size:.85rem">${r.id}</span></td>
+    <td><b>${escapeHtml(r.customerName)}</b><br><small style="color:var(--text-muted)">${escapeHtml(r.phone)}</small></td>
+    <td><small>${escapeHtml(r.tripTitle)}</small><br><small style="color:var(--text-muted)">${escapeHtml(r.tripDate||'')}</small></td>
+    <td>${r.adults}A ${r.children>0?'+ '+r.children+'N':''}</td>     <td><b>$${(r.total||0).toLocaleString()}</b></td>
+    <td><small>${new Date(r.createdAt).toLocaleDateString('es-MX')}</small></td>
+    <td>${statusBadge(r.status)}${r.checkedIn ? ' <span class="status-badge checked-in" style="margin-left:4px">✓</span>' : ''}</td>
+    <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+      <button class="btn-text ghost" onclick="sendReminderWhatsApp('${r.id}')" title="Recordatorio WhatsApp" style="padding:6px 10px;font-size:.75rem"><svg class="icon" width="12" height="12"><use href="#i-wa"/></svg></button>
+      <button class="btn-text ghost" onclick="printReservation('${r.id}')" title="Imprimir" style="padding:6px 10px;font-size:.75rem"><svg class="icon" width="12" height="12"><use href="#i-print"/></svg></button>
+      <button class="btn-text ghost" onclick="viewReservation('${r.id}')" title="Ver" style="padding:6px 10px;font-size:.75rem"><svg class="icon" width="12" height="12"><use href="#i-eye"/></svg></button>
+      ${r.status==='pending' ? `<button class="btn-text success" onclick="setReservationStatus('${r.id}','confirmed')" title="Confirmar" style="padding:6px 10px;font-size:.75rem"><svg class="icon" width="12" height="12"><use href="#i-check"/></svg></button>` : ''}
+      ${r.status!=='cancelled' ? `<button class="btn-text danger" onclick="setReservationStatus('${r.id}','cancelled')" title="Cancelar" style="padding:6px 10px;font-size:.75rem"><svg class="icon" width="12" height="12"><use href="#i-trash"/></svg></button>` : ''}
+    </div></td>
+  </tr>`).join('')}</tbody></table>`;
+}
+
+function sendReminderWhatsApp(id){
+  const r = reservations.find(x=>x.id===id); if(!r) return;
+  const msg = encodeURIComponent(
+    `Hola ${r.customerName}! 👋\n\nTe recordamos tu reservación con Turismo Alpe:\n\n` +
+    `🎫 Código: ${r.id}\n` +
+    `📍 Viaje: ${r.tripTitle}\n` +
+    `📅 Fecha: ${r.tripDate}\n` +
+    `👥 Personas: ${r.adults} adulto(s)${r.children>0 ? ` + ${r.children} niño(s)` : ''}\n` +
+    `💰 Total: $${(r.total||0).toLocaleString()} MXN\n` +
+    `💳 Pago: ${paymentLabel(r.paymentMethod)}\n\n` +
+    `¡Nos vemos pronto! Si tienes dudas, respóndenos por aquí.`
+  );
+  window.open(`https://wa.me/${r.phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
+}
+
+function setReservationStatus(id, status){
+  const r = reservations.find(x=>x.id===id); if(!r) return;
+  if(status==='cancelled' && !confirm('¿Cancelar esta reservación?')) return;
+  r.status = status;
+  localStorage.setItem(KEYS.reservations, JSON.stringify(reservations));
+  renderAdminReservations(); renderOverview();
+  toast(`Reservación ${status==='confirmed'?'confirmada':'cancelada'}`, status==='confirmed'?'success':'warning');
+}
+
+function viewReservation(id){
+  const r = reservations.find(x=>x.id===id); if(!r) return;
+  const payLabel = paymentLabel(r.paymentMethod);
+  const roomLine = r.hasRooms && r.room ? `Habitación: ${roomLabel(r.room)}\n` : '';
+  alert(`RESERVACIÓN ${r.id}\n───────────────────\nCliente: ${r.customerName}\nEmail: ${r.email}\nTeléfono: ${r.phone}\nSalida: ${r.departure||'-'}\n\nViaje: ${r.tripTitle}\nFecha: ${r.tripDate}\nAdultos: ${r.adults}\nNiños: ${r.children}\n${roomLine}\nSubtotal: $${(r.subtotal||r.total).toLocaleString()}\nDescuento: $${(r.discount||0).toLocaleString()}\nTotal: $${(r.total||0).toLocaleString()} MXN\nMétodo: ${payLabel}\nEstado: ${r.status}${r.checkedIn ? '\n✓ Asistencia registrada' : ''}\n\nComentarios: ${r.comments || 'Ninguno'}`);
+}
+
+function exportCSV(){
+  if(reservations.length === 0){ toast('No hay reservaciones', 'warning'); return; }
+  const headers = ['Código','Cliente','Email','Teléfono','Viaje','Fecha viaje','Adultos','Niños','Habitación','Total','Método pago','Estado','Asistió','Fecha reserva'];
+  const rows = reservations.map(r=>[r.id, r.customerName, r.email, r.phone, r.tripTitle, r.tripDate, r.adults, r.children, r.hasRooms ? roomLabel(r.room) : '', r.total, r.paymentMethod||'cash', r.status, r.checkedIn ? 'Sí' : 'No', new Date(r.createdAt).toLocaleString('es-MX')]);
+  const csv = [headers, ...rows].map(row=>row.map(cell=>`"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `reservaciones_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url); toast('CSV exportado', 'success');
+}
+
+function startScanner(){
+  if(isScanning) return;
+  const placeholder = document.getElementById('scannerPlaceholder');
+  placeholder.style.display = 'none';
+  html5QrCode = new Html5Qrcode("reader");
+  const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
+  html5QrCode.start({ facingMode: "environment" }, config,
+    (decodedText) => { handleScan(decodedText); },
+    () => {}
+  ).then(()=>{
+    isScanning = true;
+    document.getElementById('startScannerBtn').style.display = 'none';
+    document.getElementById('stopScannerBtn').style.display = 'inline-flex';
+    toast('Cámara activada', 'success');
+  }).catch(err => {
+    console.error(err);
+    placeholder.style.display = 'grid';
+    toast('No se pudo acceder a la cámara', 'error');
+  });
+}
+
+function stopScanner(){
+  if(!isScanning || !html5QrCode) return;
+  html5QrCode.stop().then(()=>{
+    html5QrCode.clear(); isScanning = false;
+    document.getElementById('startScannerBtn').style.display = 'inline-flex';
+    document.getElementById('stopScannerBtn').style.display = 'none';
+    document.getElementById('scannerPlaceholder').style.display = 'grid';
+  }).catch(err => console.error(err));
+}
+
+function handleScan(text){
+  if(navigator.vibrate) navigator.vibrate(100);
+  if(html5QrCode && isScanning){ html5QrCode.pause(true); setTimeout(()=>{ if(isScanning) html5QrCode.resume(); }, 2500); }
+  verifyReservation(text.trim());
+}
+
+function verifyManual(){
+  const code = document.getElementById('manualCode').value.trim();
+  if(!code){ toast('Ingresa un código', 'warning'); return; }
+  verifyReservation(code);
+  document.getElementById('manualCode').value = '';
+}
+
+function verifyReservation(code){
+  const container = document.getElementById('scanResult');
+  const r = reservations.find(x => x.id.toUpperCase() === code.toUpperCase());
+  if(!r){
+    container.className = 'scan-result err';
+    container.innerHTML = `<h4 style="color:var(--danger)"><svg class="icon" width="20" height="20"><use href="#i-alert"/></svg> Reserva no encontrada</h4><p style="font-size:.9rem;color:var(--text-muted)">El código <b class="mono">${escapeHtml(code)}</b> no corresponde a ninguna reservación.</p>`;
+    addScanHistory({ code, status:'not-found', name:'—', date: Date.now() });
+    return;
+  }
+  const tripDate = new Date(r.tripDateRaw + 'T12:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tripDay = new Date(tripDate); tripDay.setHours(0,0,0,0);
+  const diffDays = Math.round((tripDay - today) / (1000*60*60*24));
+  let dayStatus = '', dayClass = '';
+  if(diffDays === 0){ dayStatus = 'El viaje es HOY'; dayClass = 'ok'; }
+  else if(diffDays === 1){ dayStatus = 'El viaje es MAÑANA'; dayClass = 'warn'; }
+  else if(diffDays > 1){ dayStatus = `El viaje es en ${diffDays} días`; dayClass = 'warn'; }
+  else { dayStatus = `El viaje fue hace ${Math.abs(diffDays)} días`; dayClass = 'err'; }
+
+  let statusPill, statusClass;
+  if(r.status === 'cancelled'){ statusPill = 'CANCELADA'; statusClass = 'err'; }
+  else if(r.status === 'confirmed'){ statusPill = r.checkedIn ? 'CONFIRMADA · YA REGISTRADO' : 'CONFIRMADA'; statusClass = 'ok'; }
+  else { statusPill = 'PENDIENTE'; statusClass = 'warn'; }
+
+  container.className = `scan-result ${statusClass}`;
+  container.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <h4 style="margin:0"><svg class="icon" width="20" height="20"><use href="#i-check"/></svg> Reserva encontrada</h4>
+      <span class="scan-status-pill ${statusClass}">${statusPill}</span>
+    </div>
+    <div class="field"><span class="k">Código:</span><span class="v mono">${escapeHtml(r.id)}</span></div>
+    <div class="field"><span class="k">Cliente:</span><span class="v">${escapeHtml(r.customerName)}</span></div>
+    <div class="field"><span class="k">Teléfono:</span><span class="v">${escapeHtml(r.phone)}</span></div>
+    <div class="field"><span class="k">Viaje:</span><span class="v">${escapeHtml(r.tripTitle)}</span></div>
+    <div class="field"><span class="k">Fecha salida:</span><span class="v">${escapeHtml(r.tripDate)}</span></div>
+    <div class="field"><span class="k">Personas:</span><span class="v">${r.adults} adultos${r.children>0?` + ${r.children} niños`:''}</span></div>
+    ${r.hasRooms && r.room ? `<div class="field"><span class="k">Habitación:</span><span class="v">${escapeHtml(roomLabel(r.room))}</span></div>` : ''}
+    <div class="field"><span class="k">Total:</span><span class="v">$${(r.total||0).toLocaleString()} MXN</span></div>
+    <div class="field"><span class="k">Pago:</span><span class="v">${escapeHtml(paymentLabel(r.paymentMethod))}</span></div>
+    <div class="field"><span class="k">Estado del viaje:</span><span class="v" style="color:${dayClass==='ok'?'var(--success)':dayClass==='warn'?'var(--warning)':'var(--danger)'}">${dayStatus}</span></div>
+    ${r.checkedIn ? `<div class="field" style="color:var(--success)"><span class="k">✓ Asistencia:</span><span class="v">Registrada</span></div>` : ''}
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+      ${r.status === 'cancelled' ? `<div style="padding:10px 14px;background:#fee2e2;border-radius:10px;color:#991b1b;font-size:.85rem;font-weight:600;flex:1;text-align:center">Reserva cancelada. No permitir abordaje.</div>` : ''}
+      ${r.status !== 'cancelled' && !r.checkedIn ? `<button class="btn btn-success btn-block" onclick="markCheckIn('${r.id}')"><svg class="icon" width="16" height="16"><use href="#i-check"/></svg> Registrar asistencia</button>` : ''}
+      ${r.checkedIn ? `<button class="btn btn-outline btn-block" onclick="undoCheckIn('${r.id}')">Deshacer asistencia</button>` : ''}
+    </div>
+  `;
+  addScanHistory({ code: r.id, status: 'found', name: r.customerName, trip: r.tripTitle, date: Date.now() });
+}
+
+function markCheckIn(id){
+  const r = reservations.find(x=>x.id===id); if(!r) return;
+  r.checkedIn = true; r.checkedInAt = Date.now();
+  localStorage.setItem(KEYS.reservations, JSON.stringify(reservations));
+  toast('✓ Asistencia registrada', 'success');
+  verifyReservation(id);
+}
+function undoCheckIn(id){
+  const r = reservations.find(x=>x.id===id); if(!r) return;
+  r.checkedIn = false; delete r.checkedInAt;
+  localStorage.setItem(KEYS.reservations, JSON.stringify(reservations));
+  toast('Asistencia deshecha', 'warning');
+  verifyReservation(id);
+}
+function addScanHistory(entry){
+  scanHistory.unshift(entry); scanHistory = scanHistory.slice(0, 10);
+  try { localStorage.setItem(KEYS.scanHistory, JSON.stringify(scanHistory)); } catch(e){}
+  renderScanHistory();
+}
+function renderScanHistory(){
+  const el = document.getElementById('scanHistory'); if(!el) return;
+  if(scanHistory.length === 0){ el.innerHTML = `<div style="text-align:center;padding:16px">Sin escaneos aún</div>`; return; }
+  el.innerHTML = scanHistory.map(h=>{
+    const statusColor = h.status === 'found' ? 'var(--success)' : 'var(--danger)';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed var(--border);gap:8px">
+      <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">
+        <svg class="icon" width="14" height="14" style="color:${statusColor}"><use href="#i-${h.status === 'found' ? 'check' : 'alert'}"/></svg>
+        <div style="min-width:0">
+          <div class="mono" style="font-size:.78rem;color:var(--text)">${escapeHtml(h.code)}</div>
+          <div style="font-size:.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(h.name || '—')}${h.trip ? ' · ' + escapeHtml(h.trip) : ''}</div>
+        </div>
+      </div>
+      <div style="font-size:.7rem;color:var(--text-muted);white-space:nowrap">${new Date(h.date).toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'})}</div>
+    </div>`;
+  }).join('');
+}
+
+function openCmdk(){
+  document.getElementById('cmdkOverlay').classList.add('active');
+  document.getElementById('cmdkInput').value = '';
+  document.getElementById('cmdkInput').focus();
+  renderCmdkResults();
+}
+function closeCmdk(){ document.getElementById('cmdkOverlay').classList.remove('active'); }
+function handleCmdkKey(e){
+  if(e.key === 'Escape'){ closeCmdk(); return; }
+  if(e.key === 'ArrowDown'){ e.preventDefault(); cmdkSelection = Math.min(cmdkItems.length - 1, cmdkSelection + 1); renderCmdkResults(true); }
+  if(e.key === 'ArrowUp'){ e.preventDefault(); cmdkSelection = Math.max(0, cmdkSelection - 1); renderCmdkResults(true); }
+  if(e.key === 'Enter'){ e.preventDefault(); if(cmdkItems[cmdkSelection]) cmdkItems[cmdkSelection].action(); }
+}
+function renderCmdkResults(keepSelection){
+  const q = document.getElementById('cmdkInput').value.toLowerCase().trim();
+  const container = document.getElementById('cmdkResults');
+  if(!keepSelection) cmdkSelection = 0;
+
+  cmdkItems = [];
+
+  cmdkItems.push({ type:'action', icon:'i-plus', title:'Crear nuevo viaje', subtitle:'Abre el formulario de viaje', action: ()=>{ closeCmdk(); switchTab('trips'); setTimeout(()=>openTripForm(), 200); } });
+  cmdkItems.push({ type:'action', icon:'i-qr', title:'Ir al escáner QR', subtitle:'Verificar reservas por código', action: ()=>{ closeCmdk(); switchTab('scanner'); } });
+  cmdkItems.push({ type:'action', icon:'i-download', title:'Exportar todas las reservaciones', subtitle:'Descarga CSV completo', action: ()=>{ closeCmdk(); exportCSV(); } });
+  cmdkItems.push({ type:'action', icon:'i-chart', title:'Ir al dashboard', subtitle:'Estadísticas y resumen', action: ()=>{ closeCmdk(); switchTab('overview'); } });
+  cmdkItems.push({ type:'action', icon:'i-calendar-view', title:'Ver calendario de viajes', subtitle:'Vista por mes', action: ()=>{ closeCmdk(); switchTab('calendar'); } });
+
+  if(q){
+    reservations.slice(0, 200).forEach(r => {
+      if(r.id.toLowerCase().includes(q) || r.customerName.toLowerCase().includes(q) || r.phone.includes(q)){
+        cmdkItems.push({
+          type:'reservation', icon:'i-users',
+          title: `${r.customerName} · ${r.id}`,
+          subtitle: `${r.tripTitle} · $${(r.total||0).toLocaleString()} MXN · ${r.status}`,
+          action: ()=>{ closeCmdk(); switchTab('reservations'); setTimeout(()=>{ document.getElementById('resSearch').value = r.id; renderAdminReservations(); }, 200); }
+        });
+      }
+    });
+    trips.forEach(t => {
+      if(t.title.toLowerCase().includes(q) || t.destination.toLowerCase().includes(q)){
+        cmdkItems.push({
+          type:'trip', icon:'i-package',
+          title: t.title,
+          subtitle: `${t.destination} · ${t.dateText || formatDate(t.date)}`,
+          action: ()=>{ closeCmdk(); switchTab('trips'); setTimeout(()=>openTripForm(t.id), 200); }
+        });
+      }
+    });
+  }
+
+  cmdkItems = cmdkItems.slice(0, 15);
+
+  if(cmdkItems.length === 0){
+    container.innerHTML = `<div class="cmdk-empty">Sin resultados</div>`;
+    return;
+  }
+
+  container.innerHTML = cmdkItems.map((item, i)=>`
+    <div class="cmdk-item ${i === cmdkSelection ? 'selected' : ''}" onclick="cmdkItems[${i}].action()">
+      <div class="ico"><svg class="icon" width="18" height="18"><use href="#${item.icon}"/></svg></div>
+      <div class="txt">
+        <div class="t">${escapeHtml(item.title)}</div>
+        <div class="s">${escapeHtml(item.subtitle)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function printReservation(id){
+  const r = reservations.find(x=>x.id===id); if(!r){ toast('Reservación no encontrada','error'); return; }
+  const html = generateVoucherHTML(r);
+  const w = window.open('', '_blank', 'width=900,height=700');
+  if(!w){ toast('Permite ventanas emergentes para imprimir','warning'); return; }
+  w.document.open(); w.document.write(html); w.document.close();
+  setTimeout(()=>{ try{ w.focus(); w.print(); }catch(e){ console.error(e); } }, 1000);
+}
+
+function generateVoucherHTML(r){
+  const s = settings;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(r.id)}&color=0a6e5c`;
+  const logoHTML = `<img src="${COMPANY_LOGO_FILE}" alt="${escapeHtml(s.companyName)}" style="height:60px;width:auto;max-width:200px;object-fit:contain;" onerror="this.style.display='none'">`;
+  const statusLabel = { pending:'PENDIENTE DE CONFIRMACIÓN', confirmed:'CONFIRMADA', cancelled:'CANCELADA' }[r.status] || r.status;
+  const statusColor = { pending:'#f59e0b', confirmed:'#10b981', cancelled:'#ef4444' }[r.status] || '#666';
+  const subtotal = r.subtotal || r.total || 0;
+  const discount = r.discount || 0;
+  const adultOnly = subtotal - discount;
+  const roomRow = r.hasRooms && r.room ? `<div class="row"><span class="label">Habitación:</span><span class="value">${escapeHtml(roomLabel(r.room))}</span></div>` : '';
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reserva ${escapeHtml(r.id)} · ${escapeHtml(s.companyName)}</title><style>
+  @page{margin:1.2cm}*{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter','Helvetica Neue',Arial,sans-serif;color:#0f1a1a;line-height:1.5;font-size:13px;background:#fff;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{font-family:'Plus Jakarta Sans','Inter',sans-serif;letter-spacing:-.02em}
+  .voucher{max-width:820px;margin:0 auto;padding:24px}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:22px;border-bottom:3px solid #0a6e5c;margin-bottom:26px}
+  .header-left{display:flex;gap:16px;align-items:flex-start;flex:1}
+  .company-info h1{font-size:24px;font-weight:800;color:#0a6e5c;margin-bottom:6px}
+  .company-info p{font-size:11px;color:#5a6b6b;margin:2px 0}
+  .header-right{text-align:right;flex-shrink:0}
+  .code-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#5a6b6b;font-weight:700}
+  .code-value{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:800;color:#0a6e5c;margin-top:4px}
+  .status{display:inline-block;padding:5px 12px;border-radius:100px;font-size:9px;font-weight:800;text-transform:uppercase;margin-top:10px;color:#fff;background:${statusColor};letter-spacing:.5px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+  .box{background:#fafaf7;border:1px solid #e5ebe9;border-radius:10px;padding:16px}
+  .box h3{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:#0a6e5c;font-weight:800;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e5ebe9}
+  .row{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;gap:12px}
+  .row .label{color:#5a6b6b;flex-shrink:0}
+  .row .value{font-weight:600;text-align:right}
+  .price-table{background:#fafaf7;border:1px solid #e5ebe9;border-radius:10px;padding:18px;margin-bottom:18px}
+  .price-table h3{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:#0a6e5c;font-weight:800;margin-bottom:12px}
+  .price-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+  .price-row.total{border-top:2px solid #0a6e5c;margin-top:10px;padding-top:14px;font-size:20px;font-weight:800;color:#0a6e5c}
+  .price-row.discount{color:#10b981}
+  .qr-section{display:flex;gap:20px;align-items:center;padding:18px;background:#f0f9f6;border-radius:10px;margin-bottom:18px;border:1px solid #d1e9e2}
+  .qr-section .qr-text h4{font-size:14px;color:#0a6e5c;margin-bottom:6px;font-weight:800}
+  .qr-section .qr-text p{font-size:11px;color:#5a6b6b;line-height:1.5}
+  .policy{background:#fffbeb;border-left:4px solid #f59e0b;padding:14px 18px;border-radius:8px;margin-bottom:18px}
+  .policy h4{font-size:11px;text-transform:uppercase;color:#92400e;margin-bottom:8px;font-weight:800}
+  .policy p{font-size:11px;color:#78350f;line-height:1.55}
+  .thanks{text-align:center;padding:16px 0;color:#0a6e5c;font-weight:700;font-size:15px}
+  .footer{text-align:center;padding-top:18px;border-top:2px dashed #e5ebe9;margin-top:10px;font-size:10px;color:#5a6b6b}
+  .footer strong{color:#0a6e5c}
+  @media print{.voucher{padding:0}}
+  </style></head><body><div class="voucher">
+  <div class="header"><div class="header-left">${logoHTML}<div class="company-info"><h1>${escapeHtml(s.companyName)}</h1><p>Tel: ${escapeHtml(s.phone)}</p><p>Email: ${escapeHtml(s.email)}</p><p>${escapeHtml(s.address)}</p></div></div>
+  <div class="header-right"><div class="code-label">Código de reserva</div><div class="code-value">${escapeHtml(r.id)}</div><div class="status">${escapeHtml(statusLabel)}</div></div></div>
+  <div class="grid"><div class="box"><h3>Datos del cliente</h3><div class="row"><span class="label">Nombre:</span><span class="value">${escapeHtml(r.customerName)}</span></div><div class="row"><span class="label">Teléfono:</span><span class="value">${escapeHtml(r.phone)}</span></div><div class="row"><span class="label">Email:</span><span class="value">${escapeHtml(r.email)}</span></div><div class="row"><span class="label">Salida:</span><span class="value">${escapeHtml(r.departure||'-')}</span></div></div>
+  <div class="box"><h3>Datos del viaje</h3><div class="row"><span class="label">Viaje:</span><span class="value">${escapeHtml(r.tripTitle)}</span></div><div class="row"><span class="label">Fecha:</span><span class="value">${escapeHtml(r.tripDate)}</span></div><div class="row"><span class="label">Personas:</span><span class="value">${r.adults} adultos${r.children>0?` + ${r.children} niños`:''}</span></div>${roomRow}</div></div>
+  <div class="price-table"><h3>Desglose de pago</h3><div class="price-row"><span>${r.adults} adulto(s)${r.children>0?` + ${r.children} niño(s)`:''}</span><span>$${adultOnly.toLocaleString()}</span></div>${discount>0?`<div class="price-row discount"><span>Descuento</span><span>-$${discount.toLocaleString()}</span></div>`:''}<div class="price-row total"><span>TOTAL</span><span>$${(r.total||0).toLocaleString()} MXN</span></div><div class="price-row" style="margin-top:10px;font-size:11px;color:#5a6b6b;"><span>Método de pago:</span><span>${escapeHtml(paymentLabel(r.paymentMethod))}</span></div><div class="price-row" style="font-size:11px;color:#5a6b6b;"><span>Fecha de reserva:</span><span>${new Date(r.createdAt).toLocaleString('es-MX')}</span></div></div>
+  <div class="qr-section"><img src="${qrUrl}" alt="QR" width="140" height="140"><div class="qr-text"><h4>Presenta este código al abordar</h4><p>Muestra este documento <strong>impreso o digital</strong> al coordinador. El QR será escaneado para verificar tu reserva.</p><p style="margin-top:8px;"><strong>Importante:</strong> llega 15 minutos antes de la salida.</p></div></div>
+  <div class="policy"><h4>Políticas de cancelación</h4><p>${escapeHtml(s.policy)}</p></div>
+  <div class="thanks">Gracias por viajar con ${escapeHtml(s.companyName)}</div>
+  <div class="footer"><p><strong>${escapeHtml(s.companyName)}</strong> · ${escapeHtml(s.phone)} · ${escapeHtml(s.email)}</p><p style="margin-top:4px;">WhatsApp: ${escapeHtml(s.whatsapp)}</p><p style="margin-top:4px;">Documento generado electrónicamente · Válido sin firma autógrafa</p></div>
+  </div></body></html>`;
+}
+
+function formatDate(d){ if(!d) return ''; const date = new Date(d + 'T12:00:00'); const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado']; const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']; return `${dias[date.getDay()]} ${date.getDate()} de ${meses[date.getMonth()]}`; }
+function roomLabel(r){ return { dbl1:'Doble 1 cama', dbl2:'Doble 2 camas', tpl:'Triple', cpl:'Cuádruple', sencilla:'Sencilla' }[r] || r; }
+function paymentLabel(m){ return { mercadopago:'MercadoPago', paypal:'PayPal', cash:'Pago al abordar' }[m] || 'Pago al abordar'; }
+function escapeHtml(str){ if(!str) return ''; return String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function toast(msg, type='success'){ const c=document.getElementById('toastContainer'); if(!c) return; const el=document.createElement('div'); el.className=`toast ${type}`; const iconSvg = type==='success' ? '<svg class="icon" width="20" height="20"><use href="#i-check"/></svg>' : type==='error' ? '<svg class="icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>' : '<svg class="icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'; el.innerHTML=`<span class="icon">${iconSvg}</span><span class="msg">${escapeHtml(msg)}</span>`; c.appendChild(el); setTimeout(()=>{ el.style.transition='all .3s'; el.style.opacity='0'; el.style.transform='translateX(100%)'; setTimeout(()=>el.remove(),300); },3500); }
+
+window.addEventListener('storage', (e)=>{
+  if(e.key === KEYS.trips || e.key === KEYS.reservations){
+    loadData();
+    if(document.getElementById('adminDashboard').style.display !== 'none'){
+      renderOverview();
+      renderAdminTrips();
+      renderAdminReservations();
+    }
+  }
+});
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadData(); applyBranding();
+  document.querySelectorAll('.admin-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=> switchTab(tab.dataset.tab));
+  });
+  const tm = document.getElementById('tripModal');
+  if(tm) tm.addEventListener('click', e=>{ if(e.target.id === 'tripModal') closeTripForm(); });
+  document.addEventListener('keydown', e=>{
+    if((e.metaKey || e.ctrlKey) && e.key === 'k'){ e.preventDefault(); openCmdk(); }
+    if(e.key === 'Escape' && document.getElementById('cmdkOverlay').classList.contains('active')) closeCmdk();
+  });
+  if(sessionStorage.getItem(KEYS.session) === 'active') showDashboard();
+  else document.getElementById('adminLogin').style.display = 'grid';
+});
+</script>
+</body>
+</html>
